@@ -352,7 +352,7 @@ for trial in trials:
 	iViewXAPI.iV_StartRecording()
 	eye_data=[]
 	eye_positions=[]
-	last_known_eye_pos=[]
+	last_known_eye_pos=[0,0]
 	res = iViewXAPI.iV_GetSample(byref(sampleData))
 	eye_start_time=sampleData.timestamp
 	first_probe_on_target = 1
@@ -372,18 +372,17 @@ for trial in trials:
 			round(ly.gazeX, 2), round(ly.gazeY,2), ly.eyePositionZ, ly.diam, round(ry.gazeX,2), round(ry.gazeY,2), 
 			ry.eyePositionZ, ry.diam]) 
 			eye_pos = [ly.gazeX, ly.gazeY] if ly.diam > 2 and ly.diam < 7 else [ry.gazeX, ry.gazeY] if ry.diam > 2 and ry.diam < 7 else []
-			last_known_eye_pos=eye_pos
-			eye_positions.append(eye_pos)   
+			if len(eye_pos)>1:
+				last_known_eye_pos=eye_pos
 		else:
 			eye_pos=[]
-			eye_positions.append([])
+
+		eye_positions.append(eye_pos)   
 		totalFrameN+=1
 		
 		if totalFrameN>(prev_probe_frame+next_probe*frameRate):
 			thisExp.nextEntry()
 			
-			
-			print('Shit!')
 			#print(last_known_eye_pos)
 			#print(len(eye_positions))
 			probes_loop.addData('probe_over_target',0)
@@ -395,8 +394,8 @@ for trial in trials:
 			probes_loop.addData('eyeStartX',last_known_eye_pos[0])
 			probes_loop.addData('eyeStartY',last_known_eye_pos[1])
 			prev_probe_frame = totalFrameN
-			q=1
-			while q == 1:
+			
+			while True:
 				angle_deg = choice(angle_list)
 				angle=np.pi*angle_deg/180
 				eccentr=choice(ecc_list)
@@ -404,10 +403,8 @@ for trial in trials:
 				px=deg2pix(probe_xy[0], mon)
 				py=deg2pix(probe_xy[1], mon)
 				if px>-960 and px<960 and py<540 and py>-540:
-					q=0
-			#q=1
-			#while q == 1:
-			#	if probe_xy[0] and probe_xy[1]
+					break
+			
 			probe.pos = probe_xy
 			probes_loop.addData('probe_x',probe_xy[0])
 			probes_loop.addData('probe_y',probe_xy[1])
@@ -419,8 +416,7 @@ for trial in trials:
 			while next_probe<2 or next_probe>14:
 				next_probe = np.random.gamma(8, 0.8, 1)[0]
 			probeClock.reset()
-			
-			
+		
 	
 #		 mousePosText.setText('%i, %i'%(mx,my))
 #		 mousePosText.color='black'
