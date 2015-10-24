@@ -110,6 +110,7 @@ mon = monitors.Monitor(monitorName)
 win = visual.Window(size=[1024, 768], fullscr=True, screen=0, allowGUI=True, allowStencil=True,
 					monitor=mon, color=[1, 1, 1], colorSpace=u'rgb', units=u'pix')
 
+screen_dim_deg = [pix2deg(win.size[0], mon), pix2deg(win.size[1], mon)]
 #print 'Refresh rate %.3f' % win.getActualFrameRate()
 
 f = codecs.open("instr.txt", "r", encoding='utf-8')
@@ -151,7 +152,9 @@ progress_bar = visual.Rect(win, width=1, height=0.02, units='norm', pos=[0, -0.9
 						   lineColor='#aaaaaa', autoLog=False)
 
 matSize=(5,5)
-imSize=70
+imSize=2.5/1.5 #70
+imSize_70 = imSize
+imSize_94 = 94*imSize/70 #image size for rotated images is larger
 nImages=matSize[0]*matSize[1]
 
 myClock=core.Clock()
@@ -182,10 +185,10 @@ def gen_stimuli():
 
 	imList = [visual.ImageStim(win, '%s_%s/%03d.png' % tuple(parMatrix[i][0:3]),
 										 pos=(parMatrix[i][3]),
-										 units='pix') for i in xrange(len(parMatrix))]
+										 units='deg', size=imSize_70 if parMatrix[i][1]=='0' else imSize_94) for i in xrange(len(parMatrix))]
 	imList_changed = [visual.ImageStim(win, '%s_%s/%03d.png' % tuple(parMatrix[i][0:3]),
 										 pos=(parMatrix[i][3]),
-										 units='pix') for i in xrange(len(parMatrix))]
+										 units='deg', size=imSize_70 if parMatrix[i][1]=='0' else imSize_94) for i in xrange(len(parMatrix))]
 
 #	 screenshot.draw()
 	win.flip()
@@ -309,19 +312,36 @@ prev_calib_time = myClock.getTime()
 
 for trial in trials:
 	if myClock.getTime()-prev_calib_time>(60*30):
+		instr_text.text=u'Вы можете передохнуть. Нажмите пробел для продолжения.'
+		instr_text.draw()
+		win.flip()
+		event.waitKeys()
 		calibrate_and_validate()
+		
 	mousePosText.autoDraw=False
 	probes_loop = data.TrialHandler(nReps=999, method='sequential', seed=None, trialList=None, extraInfo=expInfo, name='probes_loop')
 	
 	thisExp.addLoop(probes_loop)
 	frameN = 0
 	totalFrameN = 0
-	change_pos = choice(range(nImages))
+	while True:
+		change_pos = choice(range(nImages))
+		target_pos=imList[change_pos].pos
+		
+		angle_deg = trial['trial_probe_angle']
+		angle = np.pi*angle_deg/180
+		eccentr = trial['trial_probe_ecc']
+		max_probe_y = target_pos[1]+imSize+eccentr*sin(angle) #we add imSize as it is the minimal distance for gaze position to be "on target"
+		min_probe_y = target_pos[1]-imSize+eccentr*sin(angle)
+		if abs(max_probe_y)<screen_dim_deg[1]/2 and abs(min_probe_y)<screen_dim_deg[1]/2:
+			break		
+			
+
 	trials.addData('change_pos',change_pos)
 	trial['change_pos']=change_pos
 	
 	screenshot, screenshot_changed, parMatrix, imList, imList_changed = gen_stimuli()
-	target_pos=imList[change_pos].pos
+	
 	fp.draw()
 	progress_bar.setWidth(trials.thisN / trials.nTotal)
 	progress_bar_frame.draw()
@@ -364,12 +384,12 @@ for trial in trials:
 		if res == 1:
 			ly = sampleData.leftEye
 			ry = sampleData.rightEye
-			ly.gazeX = sampleData.leftEye.gazeX - win.size[0]/2
-			ly.gazeY = -1 * (sampleData.leftEye.gazeY - win.size[1]/2)
-			ry.gazeX = sampleData.rightEye.gazeX - win.size[0]/2
-			ry.gazeY = -1 * (sampleData.rightEye.gazeY - win.size[1]/2)
+			ly.gazeX = pix2deg(sampleData.leftEye.gazeX - win.size[0]/2, mon)
+			ly.gazeY = pix2deg(-1 * (sampleData.leftEye.gazeY - win.size[1]/2), mon)
+			ry.gazeX = pix2deg(sampleData.rightEye.gazeX - win.size[0]/2, mon)
+			ry.gazeY = pix2deg(-1 * (sampleData.rightEye.gazeY - win.size[1]/2), mon)
 			eye_data.append([sampleData.timestamp,eye_start_time, sampleData.timestamp-eye_start_time, 
-			round(ly.gazeX, 2), round(ly.gazeY,2), ly.eyePositionZ, ly.diam, round(ry.gazeX,2), round(ry.gazeY,2), 
+			round(ly.gazeX, 4), round(ly.gazeY,4), ly.eyePositionZ, ly.diam, round(ry.gazeX,4), round(ry.gazeY,4), 
 			ry.eyePositionZ, ry.diam]) 
 			eye_pos = [ly.gazeX, ly.gazeY] if ly.diam > 2 and ly.diam < 7 else [ry.gazeX, ry.gazeY] if ry.diam > 2 and ry.diam < 7 else []
 			if len(eye_pos)>1:
@@ -399,10 +419,8 @@ for trial in trials:
 				angle_deg = choice(angle_list)
 				angle=np.pi*angle_deg/180
 				eccentr=choice(ecc_list)
-				probe_xy = [pix2deg(last_known_eye_pos[0], mon)+eccentr*cos(angle), pix2deg(last_known_eye_pos[1], mon)+eccentr*sin(angle)]
-				px=deg2pix(probe_xy[0], mon)
-				py=deg2pix(probe_xy[1], mon)
-				if px>-960 and px<960 and py<540 and py>-540:
+				probe_xy = [last_known_eye_pos[0]+eccentr*cos(angle), last_known_eye_pos[1]+eccentr*sin(angle)]
+				if abs(probe_xy[0])<screen_dim_deg[0]/2 and abs(probe_xy[1])<screen_dim_deg[1]/2:
 					break
 			
 			probe.pos = probe_xy
@@ -421,7 +439,7 @@ for trial in trials:
 #		 mousePosText.setText('%i, %i'%(mx,my))
 #		 mousePosText.color='black'
 		if len(eye_pos)>0:
-			on_target=np.linalg.norm(np.array(eye_pos)-np.array(target_pos))<70
+			on_target=np.linalg.norm(np.array(eye_pos)-np.array(target_pos))<imSize
 		
 		if len(eye_positions)>40:
 			
@@ -458,7 +476,7 @@ for trial in trials:
 					angle_deg = trial['trial_probe_angle']
 					angle=np.pi*angle_deg/180
 					eccentr=trial['trial_probe_ecc']
-					probe_xy = [pix2deg(last_known_eye_pos[0], mon)+eccentr*cos(angle), pix2deg(last_known_eye_pos[1], mon)+eccentr*sin(angle)]
+					probe_xy = [last_known_eye_pos[0]+eccentr*cos(angle), last_known_eye_pos[1]+eccentr*sin(angle)]
 					probe.pos = probe_xy
 					probes_loop.addData('probe_x',probe_xy[0])
 					probes_loop.addData('probe_y',probe_xy[1])
