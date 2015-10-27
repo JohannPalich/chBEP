@@ -164,7 +164,11 @@ print 'nImages %g' %nImages
 posList=[]
 for x in xrange(matSize[0]):
 	for y in xrange(matSize[1]):
+<<<<<<< HEAD
 		posList.append(((x-matSize[0]/2+1/2)*imSize*1.5, (y-matSize[1]/2+1/2)*imSize*1.5))
+=======
+		posList.append([((x-matSize[0]/2+1/2)*imSize*1.5, (y-matSize[1]/2+1/2)*imSize*1.5)])
+>>>>>>> 81c4066130a702c6fc67757d7a63cfa533355e97
 
 def gen_stimuli():
 	colors_list=['blue','brown']
@@ -187,16 +191,23 @@ def gen_stimuli():
 		for y in xrange(matSize[1]):
 #			 print (x, y)
 			parMatrix.append([colors.pop(), rots.pop(),shapes_list[x*5+y], posList[x*5+y]])
+<<<<<<< HEAD
 
 	change_type=trial['change_type']
 	change_pos=trial['change_pos']
+=======
+>>>>>>> 81c4066130a702c6fc67757d7a63cfa533355e97
 
 	imList = [visual.ImageStim(win, '%s_%s/%03d.png' % tuple(parMatrix[i][0:3]),
 										 pos=(parMatrix[i][3]),
 										 units='deg', size=imSize_70 if parMatrix[i][1]=='0' else imSize_94) for i in xrange(len(parMatrix))]
 	imList_changed = [visual.ImageStim(win, '%s_%s/%03d.png' % tuple(parMatrix[i][0:3]),
 										 pos=(parMatrix[i][3]),
+<<<<<<< HEAD
 										 units='deg', size=imSize_70 if (parMatrix[i][1]=='0' and (change_pos!=i or change_type!='rot')) or (parMatrix[i][1]!='0' and change_type=='rot' and change_pos==i) else imSize_94) for i in xrange(len(parMatrix))]
+=======
+										 units='deg', size=imSize_70 if parMatrix[i][1]=='0' else imSize_94) for i in xrange(len(parMatrix))]
+>>>>>>> 81c4066130a702c6fc67757d7a63cfa533355e97
 
 #	 screenshot.draw()
 	win.flip()
@@ -332,7 +343,11 @@ for trial in trials:
 	while True:
 		
 		change_pos = choice(range(nImages))
+<<<<<<< HEAD
 		target_pos=posList[change_pos]#[0]
+=======
+		target_pos=posList[change_pos].pos
+>>>>>>> 81c4066130a702c6fc67757d7a63cfa533355e97
 		
 		angle_deg = trial['trial_probe_angle']
 		angle = np.pi*angle_deg/180
@@ -348,7 +363,11 @@ for trial in trials:
 	
 	screenshot, screenshot_changed, parMatrix, imList, imList_changed = gen_stimuli()
 	
+<<<<<<< HEAD
 	print posList[change_pos]#[0]
+=======
+	print posList[change_pos].pos
+>>>>>>> 81c4066130a702c6fc67757d7a63cfa533355e97
 	print imList[change_pos].pos
 	
 	fp.draw()
@@ -367,7 +386,11 @@ for trial in trials:
 	engaged = 0
 	prev_probe_frame = 0
 	next_probe = 0
+<<<<<<< HEAD
 	#sampleData = []
+=======
+	sampleData = []
+>>>>>>> 81c4066130a702c6fc67757d7a63cfa533355e97
 	while next_probe<2 or next_probe>14:
 		next_probe = np.random.gamma(8, 0.8, 1)[0]
 	
