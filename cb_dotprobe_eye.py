@@ -161,6 +161,11 @@ myClock=core.Clock()
 probeClock = core.Clock()
 print 'nImages %g' %nImages
 
+posList=[]
+for x in xrange(matSize[0]):
+	for y in xrange(matSize[1]):
+		posList.append([((x-matSize[0]/2+1/2)*imSize*1.5, (y-matSize[1]/2+1/2)*imSize*1.5)])
+
 def gen_stimuli():
 	colors_list=['blue','brown']
 	rot_list=['0','45']
@@ -181,7 +186,7 @@ def gen_stimuli():
 	for x in xrange(matSize[0]):
 		for y in xrange(matSize[1]):
 #			 print (x, y)
-			parMatrix.append([colors.pop(), rots.pop(),shapes_list[x+y*5], ((x-matSize[0]/2+1/2)*imSize*1.5, (y-matSize[1]/2+1/2)*imSize*1.5)])
+			parMatrix.append([colors.pop(), rots.pop(),shapes_list[x*5+y], posList[x*5+y]])
 
 	imList = [visual.ImageStim(win, '%s_%s/%03d.png' % tuple(parMatrix[i][0:3]),
 										 pos=(parMatrix[i][3]),
@@ -325,8 +330,9 @@ for trial in trials:
 	frameN = 0
 	totalFrameN = 0
 	while True:
+		
 		change_pos = choice(range(nImages))
-		target_pos=imList[change_pos].pos
+		target_pos=posList[change_pos].pos
 		
 		angle_deg = trial['trial_probe_angle']
 		angle = np.pi*angle_deg/180
@@ -341,6 +347,9 @@ for trial in trials:
 	trial['change_pos']=change_pos
 	
 	screenshot, screenshot_changed, parMatrix, imList, imList_changed = gen_stimuli()
+	
+	print posList[change_pos].pos
+	print imList[change_pos].pos
 	
 	fp.draw()
 	progress_bar.setWidth(trials.thisN / trials.nTotal)
