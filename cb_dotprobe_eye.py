@@ -313,15 +313,31 @@ iViewXAPI.iV_StopRecording()
 res = iViewXAPI.iV_ClearRecordingBuffer()
 print 'Clear buffer %s' % res
 #iViewXAPI.iV_SetEventDetectionParameter(200, 30)
-prev_calib_time = myClock.getTime()
+prev_calib_time = globalClock.getTime()
 
 for trial in trials:
-	if myClock.getTime()-prev_calib_time>(60*30):
-		instr_text.text=u'Вы можете передохнуть. Нажмите пробел для продолжения.'
+	if (globalClock.getTime()-prev_calib_time)>(60*30):
+		instr_text.text=u'Вы можете передохнуть. Нажмите любую клавишу мыши для продолжения.'
 		instr_text.draw()
 		win.flip()
-		event.waitKeys()
+		myMouse.clickReset()
+		buttons = [0]
+
+		while not buttons[0]:
+			buttons = myMouse.getPressed()
+			core.wait(0.05)
+
+		win.winHandle.minimize() # minimise the PsychoPy window
+		win.fullscr = False # disable fullscreen
+		win.flip() # redraw the (minimised) window
+
 		calibrate_and_validate()
+
+		win.winHandle.maximize()
+		win.fullscr = True 
+		win.winHandle.activate()
+		win.flip()
+
 		
 	mousePosText.autoDraw=False
 	probes_loop = data.TrialHandler(nReps=999, method='sequential', seed=None, trialList=None, extraInfo=expInfo, name='probes_loop')
@@ -332,7 +348,7 @@ for trial in trials:
 	while True:
 		
 		change_pos = choice(range(nImages))
-		target_pos=posList[change_pos].pos
+		target_pos=posList[change_pos]
 		
 		angle_deg = trial['trial_probe_angle']
 		angle = np.pi*angle_deg/180
