@@ -15,7 +15,7 @@ import codecs, math
 from math import cos, sin
 import csv
 import copy
-import analysis
+#import analysis
 
 from heapq import nsmallest
 from operator import itemgetter
@@ -41,7 +41,7 @@ def grabScreenshot(file, win):
 #---- connect to iView
 # ---------------------------------------------
 
-from iViewXAPI import  *
+from iViewXAPI import *
 res = iViewXAPI.iV_SetLogger(c_int(1), c_char_p("iViewXSDK_Python_GazeContingent_Demo.txt"))
 res = iViewXAPI.  iV_Connect(c_char_p('127.0.0.1'), c_int(4444), c_char_p('127.0.0.1'), c_int(5555))
 
@@ -164,7 +164,11 @@ print 'nImages %g' %nImages
 posList=[]
 for x in xrange(matSize[0]):
 	for y in xrange(matSize[1]):
+<<<<<<< HEAD
+		posList.append(((x-matSize[0]/2+1/2)*imSize*1.5, (y-matSize[1]/2+1/2)*imSize*1.5))
+=======
 		posList.append([((x-matSize[0]/2+1/2)*imSize*1.5, (y-matSize[1]/2+1/2)*imSize*1.5)])
+>>>>>>> 81c4066130a702c6fc67757d7a63cfa533355e97
 
 def gen_stimuli():
 	colors_list=['blue','brown']
@@ -187,20 +191,27 @@ def gen_stimuli():
 		for y in xrange(matSize[1]):
 #			 print (x, y)
 			parMatrix.append([colors.pop(), rots.pop(),shapes_list[x*5+y], posList[x*5+y]])
+<<<<<<< HEAD
+
+	change_type=trial['change_type']
+	change_pos=trial['change_pos']
+=======
+>>>>>>> 81c4066130a702c6fc67757d7a63cfa533355e97
 
 	imList = [visual.ImageStim(win, '%s_%s/%03d.png' % tuple(parMatrix[i][0:3]),
 										 pos=(parMatrix[i][3]),
 										 units='deg', size=imSize_70 if parMatrix[i][1]=='0' else imSize_94) for i in xrange(len(parMatrix))]
 	imList_changed = [visual.ImageStim(win, '%s_%s/%03d.png' % tuple(parMatrix[i][0:3]),
 										 pos=(parMatrix[i][3]),
+<<<<<<< HEAD
+										 units='deg', size=imSize_70 if (parMatrix[i][1]=='0' and (change_pos!=i or change_type!='rot')) or (parMatrix[i][1]!='0' and change_type=='rot' and change_pos==i) else imSize_94) for i in xrange(len(parMatrix))]
+=======
 										 units='deg', size=imSize_70 if parMatrix[i][1]=='0' else imSize_94) for i in xrange(len(parMatrix))]
+>>>>>>> 81c4066130a702c6fc67757d7a63cfa533355e97
 
 #	 screenshot.draw()
 	win.flip()
 	screenshot = visual.BufferImageStim(win, stim=imList)
-
-	change_type=trial['change_type']
-	change_pos=trial['change_pos']
 
 #	 print parMatrix[change_pos]
 	#print imList[change_pos].image
@@ -348,7 +359,15 @@ for trial in trials:
 	while True:
 		
 		change_pos = choice(range(nImages))
+<<<<<<< HEAD
 		target_pos=posList[change_pos]
+=======
+<<<<<<< HEAD
+		target_pos=posList[change_pos]#[0]
+=======
+		target_pos=posList[change_pos].pos
+>>>>>>> 81c4066130a702c6fc67757d7a63cfa533355e97
+>>>>>>> origin/master
 		
 		angle_deg = trial['trial_probe_angle']
 		angle = np.pi*angle_deg/180
@@ -364,7 +383,11 @@ for trial in trials:
 	
 	screenshot, screenshot_changed, parMatrix, imList, imList_changed = gen_stimuli()
 	
+<<<<<<< HEAD
+	print posList[change_pos]#[0]
+=======
 	print posList[change_pos].pos
+>>>>>>> 81c4066130a702c6fc67757d7a63cfa533355e97
 	print imList[change_pos].pos
 	
 	fp.draw()
@@ -383,7 +406,11 @@ for trial in trials:
 	engaged = 0
 	prev_probe_frame = 0
 	next_probe = 0
+<<<<<<< HEAD
+	#sampleData = []
+=======
 	sampleData = []
+>>>>>>> 81c4066130a702c6fc67757d7a63cfa533355e97
 	while next_probe<2 or next_probe>14:
 		next_probe = np.random.gamma(8, 0.8, 1)[0]
 	
@@ -405,6 +432,8 @@ for trial in trials:
 	first_probe_on_target = 1
 	while continueRoutine:
 		mx, my = myMouse.getPos()
+		mx=pix2deg(mx,mon)
+		my=pix2deg(my,mon)
 		mouse_positions.append([mx, my])
 		res = iViewXAPI.iV_GetSample(byref(sampleData))
 		#res1 = iViewXAPI.iV_GetEvent(byref(eventData))
@@ -593,11 +622,13 @@ for trial in trials:
 		buttons, times = myMouse.getPressed(True)
 		if buttons[0]:
 			mx, my = myMouse.getPos()
+			mx=pix2deg(mx, mon)
+			my=pix2deg(my, mon)
 			for i in range(nImages):
 				rt=myClock.getTime()
 				if imList[i].contains(mx,my):
 					iViewXAPI.iV_StopRecording()
-
+					print(imList[i].pos[0])
 					trials.addData('chosen_x',imList[i].pos[0])
 					trials.addData('chosen_y',imList[i].pos[1])
 					trials.addData('mx',mx)
@@ -656,4 +687,4 @@ for trial in trials:
 win.close()
 del thisExp
 
-analysis.main(expInfo['date'])
+#analysis.main(expInfo['date'])
