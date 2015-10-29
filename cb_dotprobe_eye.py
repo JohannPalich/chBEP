@@ -337,7 +337,7 @@ for trial in trials:
 		win.fullscr = True 
 		win.winHandle.activate()
 		win.flip()
-
+		prev_calib_time=globalClock.getTime()
 		
 	mousePosText.autoDraw=False
 	probes_loop = data.TrialHandler(nReps=999, method='sequential', seed=None, trialList=None, extraInfo=expInfo, name='probes_loop')
