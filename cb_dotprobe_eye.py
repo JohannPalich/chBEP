@@ -309,17 +309,17 @@ gaussMask = visual.GratingStim(win,mask=invGaussTexture,tex=None,
 maskWidth=gaussMask.size[0]
 mousePosText=visual.TextStim(win, '',pos=[0.9,0.9],height=0.05, units='norm',color='black')
 
-iViewXAPI.iV_StopRecording()
+iViewXAPI.iV_StopRecording()  
 res = iViewXAPI.iV_ClearRecordingBuffer()
 print 'Clear buffer %s' % res
 #iViewXAPI.iV_SetEventDetectionParameter(200, 30)
 prev_calib_time = globalClock.getTime()
 
 for trial in trials:
-	if (globalClock.getTime()-prev_calib_time)>(60*30):
-		instr_text.text=u'Вы можете передохнуть. Нажмите любую клавишу мыши для продолжения.'
+	if (globalClock.getTime()-prev_calib_time)>(60*0.1):
+		instr_text.text=u'Вы можете передохнуть. Нажмите левую кнопку мыши для продолжения.'
 		instr_text.draw()
-		win.flip()
+		win.flip() 
 		myMouse.clickReset()
 		buttons = [0]
 
@@ -390,11 +390,15 @@ for trial in trials:
 	nPasses=0
 	helper.setText(u'Какая картинка меняется?')
 	helper.setAutoDraw(True)
-	
 	myClock.reset()
 	probeClock.reset()
 	prev_time=myClock.getTime()
-	
+	iViewXAPI.iV_StopRecording()
+	iViewXAPI.iV_ClearRecordingBuffer()
+	buttons=myMouse.GetPressed()
+	buttons=[]
+	print('Here1')
+
 	iViewXAPI.iV_StartRecording()
 	eye_data=[]
 	eye_positions=[]
@@ -403,6 +407,7 @@ for trial in trials:
 	res = iViewXAPI.iV_GetSample(byref(sampleData))
 	eye_start_time=sampleData.timestamp
 	first_probe_on_target = 1
+	myMouse.clickReset() 
 	while continueRoutine:
 		mx, my = myMouse.getPos()
 		mx=pix2deg(mx,mon)
@@ -426,7 +431,6 @@ for trial in trials:
 				last_known_eye_pos=eye_pos
 		else:
 			eye_pos=[]
-
 		eye_positions.append(eye_pos)   
 		totalFrameN+=1
 		
@@ -580,7 +584,6 @@ for trial in trials:
 		progress_bar.draw()
 #		 mousePosText.draw()
 		win.flip()
-
 		frameN+=1
 
 		if len(event.getKeys('space')):
@@ -592,6 +595,7 @@ for trial in trials:
 			probes_loop.addData('eyeEndY',last_known_eye_pos[1])
 			probe.autoDraw = False
 
+ 
 		buttons, times = myMouse.getPressed(True)
 		if buttons[0]:
 			mx, my = myMouse.getPos()
@@ -647,11 +651,11 @@ for trial in trials:
 			buttons=[]
 			while myMouse.getPressed()[0]==1:
 				pass
+
 		if len(event.getKeys(['escape'])):
 			core.quit()
 		elif len(event.getKeys(['s'])):
 			grabScreenshot('sshot_%i_%i' % (trials.thisN,len(mouse_positions)), win)
-
 		if len(event.getKeys('escape')):
 			core.quit()
 	thisExp.nextEntry()
