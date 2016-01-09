@@ -526,8 +526,9 @@ for trial in trials:
 					
 					#mousePosText.autoDraw=False
 					
-				else:
-					engaged=0
+			elif engaged and not on_target:
+				engaged=0
+				probe_autodraw=False
 			#elif on_target and engaged and (len(mouse_positions)-start_pursuit)>20:
 
 				#mousePosText.setText('Voila!')
