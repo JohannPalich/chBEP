@@ -316,16 +316,19 @@ print 'Clear buffer %s' % res
 prev_calib_time = globalClock.getTime()
 
 for trial in trials:
-	if (globalClock.getTime()-prev_calib_time)>(60*0.1):
-		instr_text.text=u'Вы можете передохнуть. Нажмите левую кнопку мыши для продолжения.'
+	if (globalClock.getTime()-prev_calib_time)>(60*15):
+		instr_text.text=u'Вы можете передохнуть. Нажмите на клавишу "S" для продолжения.'
 		instr_text.draw()
 		win.flip() 
 		myMouse.clickReset()
 		buttons = [0]
 
-		while not buttons[0]:
-			buttons = myMouse.getPressed()
-			core.wait(0.05)
+#		while not buttons[0]:
+#			buttons = myMouse.getPressed()
+#			core.wait(0.05)
+
+		while not len(event.getKeys(['s'])):
+			core.wait(0.05)         
 
 		win.winHandle.minimize() # minimise the PsychoPy window
 		win.fullscr = False # disable fullscreen
@@ -395,7 +398,7 @@ for trial in trials:
 	prev_time=myClock.getTime()
 	iViewXAPI.iV_StopRecording()
 	iViewXAPI.iV_ClearRecordingBuffer()
-	buttons=myMouse.GetPressed()
+	buttons=myMouse.getPressed() 
 	buttons=[]
 	print('Here1')
 
