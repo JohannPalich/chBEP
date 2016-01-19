@@ -316,16 +316,19 @@ print 'Clear buffer %s' % res
 prev_calib_time = globalClock.getTime()
 
 for trial in trials:
-	if (globalClock.getTime()-prev_calib_time)>(60*0.1):
-		instr_text.text=u'Вы можете передохнуть. Нажмите левую кнопку мыши для продолжения.'
+	if (globalClock.getTime()-prev_calib_time)>(60*15):
+		instr_text.text=u'Вы можете передохнуть. Нажмите на клавишу "S" для продолжения.'
 		instr_text.draw()
 		win.flip() 
 		myMouse.clickReset()
 		buttons = [0]
 
-		while not buttons[0]:
-			buttons = myMouse.getPressed()
-			core.wait(0.05)
+#		while not buttons[0]:
+#			buttons = myMouse.getPressed()
+#			core.wait(0.05)
+
+		while not len(event.getKeys(['s'])):
+			core.wait(0.05)  
 
 		win.winHandle.minimize() # minimise the PsychoPy window
 		win.fullscr = False # disable fullscreen
@@ -394,7 +397,7 @@ for trial in trials:
 	prev_time=myClock.getTime()
 	iViewXAPI.iV_StopRecording()
 	iViewXAPI.iV_ClearRecordingBuffer()
-	buttons=myMouse.GetPressed()
+	buttons=myMouse.getPressed()
 	buttons=[]
 	print('Here1')
 
@@ -406,9 +409,9 @@ for trial in trials:
 	res = iViewXAPI.iV_GetSample(byref(sampleData))
 	eye_start_time=sampleData.timestamp
 	first_probe_on_target = 1
-	
+	pursuitStartFrame = 0
 	myMouse.clickReset() 
-	
+	current=-1
 	on_target = current_item = item_change_frameN = item_change_totalFrameN = 0 
 	
 	while continueRoutine:
@@ -463,10 +466,12 @@ for trial in trials:
 		# when pursuitStartFrame falls within the last min_n frames of either phase or during mask period, it is not considered as "seeing the stimuli"
 		# thus, we need to update it if observer continues to look at the target
 		
-		if (pursuitStartFrame>(showTime-min_n) and pursuitStartFrame<(showTime+maskTime+min_n) and frameN>(showTime+maskTime+min_n)) or (pursuitStartFrame>(2*showTime+maskTime-min_n) and frameN>=min_n and frameN<showTime):
+		if pursuitStartFrame!=0 and (pursuitStartFrame>(showTime-min_n) and pursuitStartFrame<(showTime+maskTime+min_n) and frameN>(showTime+maskTime+min_n)) or (pursuitStartFrame>(2*showTime+maskTime-min_n) and frameN>=min_n and frameN<showTime):
 			pursuitStartFrame = frameN
+			print('MyLittleProby')
+		print(current)
 
-		if current!=-1 and ((pursuitStartFrame>=0 and pursuitStartFrame<(showTime-min_n) and frameN>(showTime+maskTime+min_n)) or \ #eye comes to target during the 1st phase
+		if current_item!=-1 and ((pursuitStartFrame>=0 and pursuitStartFrame<(showTime-min_n) and frameN>(showTime+maskTime+min_n)) or #eye comes to target during the 1st phase
 			(frameN>=min_n and frameN<showTime and pursuitStartFrame>(showTime+maskTime+min_n) and pursuitStartFrame<(2*showTime+maskTime-min_n))): #eye comes to target during the 2nd phase
 			seen_both_versions_for_n_frames = 1
 		else:
@@ -582,7 +587,7 @@ for trial in trials:
 				#if dist<(gaussMask.size[0]/2-128):
 				im.draw()
 #				 im.draw()
-			if frameN==0:
+			i     ameN==0:
 				time=myClock.getTime()
 				#logging.debug('A start. Time %.3f, delta: %.3f' %(time, time-prev_time))
 				prev_time=time
