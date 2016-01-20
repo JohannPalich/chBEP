@@ -22,9 +22,10 @@ from operator import itemgetter
 
 # Store info about the experiment session
 expName = u'cb1'  # from the Builder filename that created this script
-expInfo = {u'1. Ваше имя (или ник)': u'', u'2. Возраст': u'', u'3. Пол (m/f)': u'', u'4. Доминирующий глаз (l/r)':u'',u'5. Метод трекинга (l/r/b)':u''}
+expInfo = {u'1. Ваше имя (или ник)': u'', u'2. Возраст': u'', u'3. Пол (m/f)': u'', u'4. Доминирующий глаз (l/r)':u'',u'5. Метод трекинга (l/r/b)':u'', 'Tracking Enabled':'0'}
 dlg = gui.DlgFromDict(dictionary=expInfo, title=expName)
 tracking_mode = expInfo[u'5. Метод трекинга (l/r/b)']
+tracking_en = int(expInfo['Tracking Enabled'])
 
 if dlg.OK == False or tracking_mode not in ['l','r','b']: core.quit()	 # user pressed cancel
 expInfo['date'] = data.getDateStr()	 # add a simple timestamp
@@ -41,15 +42,16 @@ def grabScreenshot(file, win):
 #---- connect to iView
 # ---------------------------------------------
 
-from iViewXAPI import *
-res = iViewXAPI.iV_SetLogger(c_int(1), c_char_p("iViewXSDK_Python_GazeContingent_Demo.txt"))
-res = iViewXAPI.  iV_Connect(c_char_p('127.0.0.1'), c_int(4444), c_char_p('127.0.0.1'), c_int(5555))
+if tracking_en:
+	from iViewXAPI import *
+	res = iViewXAPI.iV_SetLogger(c_int(1), c_char_p("iViewXSDK_Python_GazeContingent_Demo.txt"))
+	res = iViewXAPI.  iV_Connect(c_char_p('127.0.0.1'), c_int(4444), c_char_p('127.0.0.1'), c_int(5555))
 
-res = iViewXAPI.iV_GetSystemInfo(byref(systemData))
-print "iV_GetSystemInfo: " + str(res)
-print "Samplerate: " + str(systemData.samplerate)
-print "iViewX Verion: " + str(systemData.iV_MajorVersion) + "." + str(systemData.iV_MinorVersion) + "." + str(systemData.iV_Buildnumber)
-print "iViewX API Verion: " + str(systemData.API_MajorVersion) + "." + str(systemData.API_MinorVersion) + "." + str(systemData.API_Buildnumber)
+	res = iViewXAPI.iV_GetSystemInfo(byref(systemData))
+	print "iV_GetSystemInfo: " + str(res)
+	print "Samplerate: " + str(systemData.samplerate)
+	print "iViewX Verion: " + str(systemData.iV_MajorVersion) + "." + str(systemData.iV_MinorVersion) + "." + str(systemData.iV_Buildnumber)
+	print "iViewX API Verion: " + str(systemData.API_MajorVersion) + "." + str(systemData.API_MinorVersion) + "." + str(systemData.API_Buildnumber)
 
 
 # ---------------------------------------------
@@ -77,8 +79,8 @@ def calibrate_and_validate():
 		dev_x = float(accuracyData.deviationLX) if tracking_mode=='l' or tracking_mode=='b' else float(accuracyData.deviationRX)
 		dev_y = float(accuracyData.deviationLY) if tracking_mode=='l' or tracking_mode=='b' else float(accuracyData.deviationRY)
 	
-
-calibrate_and_validate()
+if tracking_en:
+	calibrate_and_validate()
 
 globalClock = core.Clock()
 
@@ -309,9 +311,10 @@ gaussMask = visual.GratingStim(win,mask=invGaussTexture,tex=None,
 maskWidth=gaussMask.size[0]
 mousePosText=visual.TextStim(win, '',pos=[0.9,0.9],height=0.05, units='norm',color='black')
 
-iViewXAPI.iV_StopRecording()  
-res = iViewXAPI.iV_ClearRecordingBuffer()
-print 'Clear buffer %s' % res
+if tracking_en:
+	iViewXAPI.iV_StopRecording()  
+	res = iViewXAPI.iV_ClearRecordingBuffer()
+	print 'Clear buffer %s' % res
 #iViewXAPI.iV_SetEventDetectionParameter(200, 30)
 prev_calib_time = globalClock.getTime()
 
@@ -333,8 +336,8 @@ for trial in trials:
 		win.winHandle.minimize() # minimise the PsychoPy window
 		win.fullscr = False # disable fullscreen
 		win.flip() # redraw the (minimised) window
-
-		calibrate_and_validate()
+		if tracking_en:
+			calibrate_and_validate()
 
 		win.winHandle.maximize()
 		win.fullscr = True 
@@ -396,19 +399,21 @@ for trial in trials:
 	myClock.reset()
 	probeClock.reset()
 	prev_time=myClock.getTime()
-	iViewXAPI.iV_StopRecording()
-	iViewXAPI.iV_ClearRecordingBuffer()
+	if tracking_en:
+		iViewXAPI.iV_StopRecording()
+		iViewXAPI.iV_ClearRecordingBuffer()
 	buttons=myMouse.getPressed() 
 	buttons=[]
 	print('Here1')
-
-	iViewXAPI.iV_StartRecording()
+	if tracking_en:
+		iViewXAPI.iV_StartRecording()
 	eye_data=[]
 	eye_positions=[]
 	last_known_eye_pos=[0,0]
 	lastEyeTimeStamp = -1
-	res = iViewXAPI.iV_GetSample(byref(sampleData))
-	eye_start_time=sampleData.timestamp
+	if tracking_en:
+		res = iViewXAPI.iV_GetSample(byref(sampleData))
+		eye_start_time=sampleData.timestamp
 	first_probe_on_target = 1
 	myMouse.clickReset() 
 	current_item = 0
@@ -418,24 +423,27 @@ for trial in trials:
 		mx=pix2deg(mx,mon)
 		my=pix2deg(my,mon)
 		mouse_positions.append([mx, my])
-		res = iViewXAPI.iV_GetSample(byref(sampleData))
+		if tracking_en:
+			res = iViewXAPI.iV_GetSample(byref(sampleData))
 		#res1 = iViewXAPI.iV_GetEvent(byref(eventData))
-		if res == 1:
-			ly = sampleData.leftEye
-			ry = sampleData.rightEye
-			lastEyeTimeStamp = sampleData.timestamp
-			ly.gazeX = pix2deg(sampleData.leftEye.gazeX - win.size[0]/2, mon)
-			ly.gazeY = pix2deg(-1 * (sampleData.leftEye.gazeY - win.size[1]/2), mon)
-			ry.gazeX = pix2deg(sampleData.rightEye.gazeX - win.size[0]/2, mon)
-			ry.gazeY = pix2deg(-1 * (sampleData.rightEye.gazeY - win.size[1]/2), mon)
-			eye_data.append([sampleData.timestamp,eye_start_time, sampleData.timestamp-eye_start_time, 
-			round(ly.gazeX, 4), round(ly.gazeY,4), ly.eyePositionZ, ly.diam, round(ry.gazeX,4), round(ry.gazeY,4), 
-			ry.eyePositionZ, ry.diam]) 
-			eye_pos = [ly.gazeX, ly.gazeY] if ly.diam > 2 and ly.diam < 7 else [ry.gazeX, ry.gazeY] if ry.diam > 2 and ry.diam < 7 else []
-			if len(eye_pos)>1:
-				last_known_eye_pos=eye_pos
+			if res == 1:
+				ly = sampleData.leftEye
+				ry = sampleData.rightEye
+				lastEyeTimeStamp = sampleData.timestamp
+				ly.gazeX = pix2deg(sampleData.leftEye.gazeX - win.size[0]/2, mon)
+				ly.gazeY = pix2deg(-1 * (sampleData.leftEye.gazeY - win.size[1]/2), mon)
+				ry.gazeX = pix2deg(sampleData.rightEye.gazeX - win.size[0]/2, mon)
+				ry.gazeY = pix2deg(-1 * (sampleData.rightEye.gazeY - win.size[1]/2), mon)
+				eye_data.append([sampleData.timestamp,eye_start_time, sampleData.timestamp-eye_start_time, 
+				round(ly.gazeX, 4), round(ly.gazeY,4), ly.eyePositionZ, ly.diam, round(ry.gazeX,4), round(ry.gazeY,4), 
+				ry.eyePositionZ, ry.diam]) 
+				eye_pos = [ly.gazeX, ly.gazeY] if ly.diam > 2 and ly.diam < 7 else [ry.gazeX, ry.gazeY] if ry.diam > 2 and ry.diam < 7 else []
+				if len(eye_pos)>1:
+					last_known_eye_pos=eye_pos
+			else:
+				eye_pos=[]
 		else:
-			eye_pos=[]
+			eye_pos=[mx, my]
 		eye_positions.append(eye_pos)   
 		totalFrameN+=1
 		
@@ -601,7 +609,8 @@ for trial in trials:
 			for i in range(nImages):
 				rt=myClock.getTime()
 				if imList[i].contains(mx,my):
-					iViewXAPI.iV_StopRecording()
+					if tracking_en:
+						iViewXAPI.iV_StopRecording()
 					print(imList[i].pos[0])
 					trials.addData('chosen_x',imList[i].pos[0])
 					trials.addData('chosen_y',imList[i].pos[1])
@@ -625,9 +634,10 @@ for trial in trials:
 					win.flip()
 					
 					outputfile = os.getcwd()+'\\'+filename+'_trial_'+`trials.thisN`+'_eye'
-					res = iViewXAPI.iV_SaveData(str(outputfile),'','', 1)
-					print 'iV_SaveData ' + str(res)
-					print "data saved to: " + outputfile
+					if tracking_en:
+						res = iViewXAPI.iV_SaveData(str(outputfile),'','', 1)
+						print 'iV_SaveData ' + str(res)
+						print "data saved to: " + outputfile
 
 					with open(filename+'_trial_'+`trials.thisN`+'.csv', 'wb') as f:
 						writer = csv.writer(f)
