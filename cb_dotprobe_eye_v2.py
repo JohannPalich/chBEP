@@ -595,9 +595,9 @@ for trial in trials:
 				dist=np.linalg.norm((mx, my)- pos)
 				#if dist<(gaussMask.size[0]/2-128):
 				im.draw()
-#				 im.draw()
-			i     ameN==0:
-				time=myClock.getTime()
+#				im.draw()
+				if frameN==0:
+					time=myClock.getTime()
 				#logging.debug('A start. Time %.3f, delta: %.3f' %(time, time-prev_time))
 				prev_time=time
 		elif frameN==(showTime):
