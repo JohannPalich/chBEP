@@ -21,7 +21,7 @@ from heapq import nsmallest
 from operator import itemgetter
 
 # Store info about the experiment session
-expName = u'cb1'  # from the Builder filename that created this script
+expName = u'cb_v1'  # from the Builder filename that created this script
 expInfo = {u'1. Ваше имя (или ник)': u'', u'2. Возраст': u'', u'3. Пол (m/f)': u'', u'4. Доминирующий глаз (l/r)':u'',u'5. Метод трекинга (l/r/b)':u'', 'Tracking Enabled':'0'}
 dlg = gui.DlgFromDict(dictionary=expInfo, title=expName)
 tracking_mode = expInfo[u'5. Метод трекинга (l/r/b)']
