@@ -486,51 +486,7 @@ for trial in trials:
 		else:
 			seen_both_versions_for_n_frames = 0
 		
-		if current_item!=-1 and totalFrameN>(prev_probe_frame+next_probe*frameRate) and seen_both_versions_for_n_frames:
-			thisExp.nextEntry()
-			trials.addData('pursuitStart',pursuitStartFrame)
-			trials.addData('item_change_frameN',item_change_frameN)
-			trials.addData('item_change_totalFrameN',item_change_totalFrameN)
-			trials.addData('pursuitEnd',frameN)
-			trials.addData('pursuitDuration',totalFrameN-item_change_totalFrameN)
-			
-			#print(last_known_eye_pos)
-			#print(len(eye_positions))
-			probes_loop.addData('probe_over_target',0)
-			probes_loop.addData('probe_start_frameN',totalFrameN)
-			probes_loop.addData('probe_delay',next_probe)
-			probes_loop.addData('probe_start_time',myClock.getTime())
-			probes_loop.addData('probe_start_rel_time',probeClock.getTime())
-			probes_loop.addData('eyeStartTimeStamp',lastEyeTimeStamp)
-			probes_loop.addData('eyeStartX',last_known_eye_pos[0])
-			probes_loop.addData('eyeStartY',last_known_eye_pos[1])
-			prev_probe_frame = totalFrameN
-			
-			while True:
-				angle_deg = choice(angle_list)
-				angle=np.pi*angle_deg/180
-				eccentr=choice(ecc_list)
-				probe_xy = [last_known_eye_pos[0]+eccentr*cos(angle), last_known_eye_pos[1]+eccentr*sin(angle)]
-				if abs(probe_xy[0])<screen_dim_deg[0]/2 and abs(probe_xy[1])<screen_dim_deg[1]/2:
-					break
-			
-			probe.pos = probe_xy
-			probes_loop.addData('probe_x',probe_xy[0])
-			probes_loop.addData('probe_y',probe_xy[1])
-			probes_loop.addData('probe_angle',angle_deg)
-			probes_loop.addData('probe_ecc',eccentr)
-			
-			probe.autoDraw = True
-			next_probe = 0
-			while next_probe<2 or next_probe>14:
-				next_probe = np.random.gamma(8, 0.8, 1)[0]
-			probeClock.reset()
-		
-	
-#		 mousePosText.setText('%i, %i'%(mx,my))
-#		 mousePosText.color='black'
-		
-		if (on_target and first_probe_on_target or totalFrameN>(prev_probe_frame+next_probe*frameRate)) and seen_both_versions_for_n_frames:
+		if (on_target and first_probe_on_target or totalFrameN>(prev_probe_frame+next_probe*frameRate)) and seen_both_versions_for_n_frames and abs(last_known_eye_pos[0]) < imSize*3 and abs(last_known_eye_pos[1]) < imSize*3:
 			thisExp.nextEntry()
 			trials.addData('pursuitStart',pursuitStartFrame)
 			trials.addData('item_change_frameN',item_change_frameN)
@@ -579,6 +535,51 @@ for trial in trials:
 			while next_probe<2 or next_probe>14:
 				next_probe = np.random.gamma(8, 0.8, 1)[0]
 			probeClock.reset()
+		
+		if current_item!=-1 and totalFrameN>(prev_probe_frame+next_probe*frameRate) and seen_both_versions_for_n_frames  and abs(last_known_eye_pos[0]) < imSize*3 and abs(last_known_eye_pos[1]) < imSize*3:
+			thisExp.nextEntry()
+			trials.addData('pursuitStart',pursuitStartFrame)
+			trials.addData('item_change_frameN',item_change_frameN)
+			trials.addData('item_change_totalFrameN',item_change_totalFrameN)
+			trials.addData('pursuitEnd',frameN)
+			trials.addData('pursuitDuration',totalFrameN-item_change_totalFrameN)
+			
+			#print(last_known_eye_pos)
+			#print(len(eye_positions))
+			probes_loop.addData('probe_over_target',0)
+			probes_loop.addData('probe_start_frameN',totalFrameN)
+			probes_loop.addData('probe_delay',next_probe)
+			probes_loop.addData('probe_start_time',myClock.getTime())
+			probes_loop.addData('probe_start_rel_time',probeClock.getTime())
+			probes_loop.addData('eyeStartTimeStamp',lastEyeTimeStamp)
+			probes_loop.addData('eyeStartX',last_known_eye_pos[0])
+			probes_loop.addData('eyeStartY',last_known_eye_pos[1])
+			prev_probe_frame = totalFrameN
+			
+			while True:
+				angle_deg = choice(angle_list)
+				angle=np.pi*angle_deg/180
+				eccentr=choice(ecc_list)
+				probe_xy = [last_known_eye_pos[0]+eccentr*cos(angle), last_known_eye_pos[1]+eccentr*sin(angle)]
+				if abs(probe_xy[0])<screen_dim_deg[0]/2 and abs(probe_xy[1])<screen_dim_deg[1]/2:
+					break
+			
+			probe.pos = probe_xy
+			probes_loop.addData('probe_x',probe_xy[0])
+			probes_loop.addData('probe_y',probe_xy[1])
+			probes_loop.addData('probe_angle',angle_deg)
+			probes_loop.addData('probe_ecc',eccentr)
+			
+			probe.autoDraw = True
+			next_probe = 0
+			while next_probe<2 or next_probe>14:
+				next_probe = np.random.gamma(8, 0.8, 1)[0]
+			probeClock.reset()
+		
+	
+#		 mousePosText.setText('%i, %i'%(mx,my))
+#		 mousePosText.color='black'
+		
 			
 			#mousePosText.autoDraw=False
 			

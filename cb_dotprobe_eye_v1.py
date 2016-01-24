@@ -21,7 +21,7 @@ from heapq import nsmallest
 from operator import itemgetter
 
 # Store info about the experiment session
-expName = u'cb_v1'  # from the Builder filename that created this script
+expName = u'cb_v1'	# from the Builder filename that created this script
 expInfo = {u'1. Ваше имя (или ник)': u'', u'2. Возраст': u'', u'3. Пол (m/f)': u'', u'4. Доминирующий глаз (l/r)':u'',u'5. Метод трекинга (l/r/b)':u'', 'Tracking Enabled':'0'}
 dlg = gui.DlgFromDict(dictionary=expInfo, title=expName)
 tracking_mode = expInfo[u'5. Метод трекинга (l/r/b)']
@@ -78,7 +78,8 @@ def calibrate_and_validate():
 		print "deviationXRight " + str(accuracyData.deviationRX) + " deviationYRight " + str(accuracyData.deviationRY)
 		dev_x = float(accuracyData.deviationLX) if tracking_mode=='l' or tracking_mode=='b' else float(accuracyData.deviationRX)
 		dev_y = float(accuracyData.deviationLY) if tracking_mode=='l' or tracking_mode=='b' else float(accuracyData.deviationRY)
-	
+
+
 if tracking_en:
 	calibrate_and_validate()
 
@@ -95,6 +96,7 @@ logging.console.setLevel(logging.WARNING)  # this outputs to the screen, not a f
 # An ExperimentHandler isn't essential but helps with data saving
 thisExp = data.ExperimentHandler(name=expName, version='',
 								 extraInfo=expInfo, runtimeInfo=None,
+
 								 originPath=None,
 								 savePickle=True, saveWideText=True,
 								 dataFileName=filename)
@@ -104,8 +106,8 @@ monitorName = 'LG Flatron L1718S'
 monitorName = 'SyncMaster 797MB'
 monitorName = 'ASUS ML 239'
 #monitorName = 'HP Compaq LA2205wg'
-monitorName = 'Dell Vostro 5470'
-monitorName = 'testMonitor'
+#monitorName = 'Dell Vostro 5470'
+#monitorName = 'testMonitor'
 frameRate = 60
 mon = monitors.Monitor(monitorName)
 
@@ -249,18 +251,19 @@ def gen_stimuli():
 
 probe = visual.Circle(win, 0.2, 96, units='deg',  fillColor='#a8a8a8', lineWidth=0)
 
-	
+
+
 maskTime=5
 showTime=15
 fpTime=1 #in second
-change_types=['color','rot','shape']
+change_types=['shape']
 trainingList = data.createFactorialTrialList(factors={'change_type': change_types,'change_pos':range(nImages)})
 shuffle(trainingList)
 
 fullPosList=range(nImages)
 shuffle(fullPosList)
 
-mainTrials=[]
+#mainTrials=[]
 ecc_list=[x - .5 for x in range(1, 8)]
 angle_list=range(0,360,30)
 
@@ -268,13 +271,13 @@ angle_list=range(0,360,30)
 #for i in change_types:
 #	 print i
 #	 print sample(range(nImages),5)
-factorsList = data.createFactorialTrialList(factors={'change_type': change_types, 'trial_probe_ecc':ecc_list, 'trial_probe_angle':angle_list})
+factorsList = data.createFactorialTrialList(factors={'change_type': change_types, 'trial_probe_ecc':ecc_list, 'trial_probe_angle':angle_list, 'show_probe_on_target':[0,1,1]})
 	#print 'factorsList: %g'%len(factorsList)
 	#mainTrials=mainTrials+factorsList
 
-shuffle(mainTrials)
+#shuffle(mainTrials)
 
-trials = data.TrialHandler(nReps=1.0, method='random', extraInfo=expInfo, trialList=factorsList)
+trials = data.TrialHandler(nReps=3, method='random', extraInfo=expInfo, trialList=factorsList)
 thisExp.addLoop(trials)
 
 print 'Total trials: %g'%trials.nTotal
@@ -302,6 +305,7 @@ invGaussTexture = replicate(invGaussTexture,'Y','end',30)
 helper = visual.TextStim(win=win, text='', units=u'norm', pos=[0, 0.9], height=0.05, autoLog=False, color='black')
 helper2 = visual.TextStim(win=win, text=u'Если вы заметили меняющуюся картинку, и она сейчас показана, \nщелкните на нее правой кнопкой.', units=u'norm', pos=[0, -0.9], height=0.04,alignHoriz='center', autoLog=False, color=[0,0,0])
 
+fb_text = visual.TextStim(win=win, text='', units=u'norm', pos=[0, 0], height=0.05, autoLog=False, color='black')
 
 origMaskSize=256*4
 gaussMask = visual.GratingStim(win,mask=invGaussTexture,tex=None,
@@ -312,17 +316,20 @@ maskWidth=gaussMask.size[0]
 mousePosText=visual.TextStim(win, '',pos=[0.9,0.9],height=0.05, units='norm',color='black')
 
 if tracking_en:
-	iViewXAPI.iV_StopRecording()  
+	iViewXAPI.iV_StopRecording()
 	res = iViewXAPI.iV_ClearRecordingBuffer()
 	print 'Clear buffer %s' % res
 #iViewXAPI.iV_SetEventDetectionParameter(200, 30)
 prev_calib_time = globalClock.getTime()
 
+score = 0
+totalScore = 0
+
 for trial in trials:
 	if (globalClock.getTime()-prev_calib_time)>(60*15):
-		instr_text.text=u'Вы можете передохнуть. Нажмите на клавишу "S" для продолжения.'
+		instr_text.text=u'Вы можете передохнуть. Текущий счет: %+d. Нажмите на клавишу "S" для продолжения.' % totalScore
 		instr_text.draw()
-		win.flip() 
+		win.flip()
 		myMouse.clickReset()
 		buttons = [0]
 
@@ -331,7 +338,7 @@ for trial in trials:
 #			core.wait(0.05)
 
 		while not len(event.getKeys(['s'])):
-			core.wait(0.05)         
+			core.wait(0.05)
 
 		win.winHandle.minimize() # minimise the PsychoPy window
 		win.fullscr = False # disable fullscreen
@@ -340,40 +347,58 @@ for trial in trials:
 			calibrate_and_validate()
 
 		win.winHandle.maximize()
-		win.fullscr = True 
+		win.fullscr = True
 		win.winHandle.activate()
 		win.flip()
 		prev_calib_time=globalClock.getTime()
-		
+
+
 	mousePosText.autoDraw=False
 	probes_loop = data.TrialHandler(nReps=999, method='sequential', seed=None, trialList=None, extraInfo=expInfo, name='probes_loop')
-	
+
+
 	thisExp.addLoop(probes_loop)
 	frameN = 0
 	totalFrameN = 0
 	while True:
-		
+
+
 		change_pos = choice(range(nImages))
 		target_pos=posList[change_pos]
-		
+
+
 		angle_deg = trial['trial_probe_angle']
 		angle = np.pi*angle_deg/180
 		eccentr = trial['trial_probe_ecc']
 		max_probe_y = target_pos[1]+imSize+eccentr*sin(angle) #we add imSize as it is the minimal distance for gaze position to be "on target"
 		min_probe_y = target_pos[1]-imSize+eccentr*sin(angle)
 		if abs(max_probe_y)<screen_dim_deg[1]/2 and abs(min_probe_y)<screen_dim_deg[1]/2:
-			break		
-			
+
+
+			break
+
 
 	trials.addData('change_pos',change_pos)
 	trial['change_pos']=change_pos
-	
+
+
 	screenshot, screenshot_changed, parMatrix, imList, imList_changed = gen_stimuli()
-	
+
+
 	print posList[change_pos]#[0]
 	print imList[change_pos].pos
-	
-	fp.draw()
+
+	fb_text.text = '%+d' % (score)
+	trials.addData('trialScore', score)
+	totalScore += score
+	if score < 0:
+		fb_text.color = [1, 0, 0]
+	else:
+		fb_text.color = [0, 1, 0]
+
+	fb_text.draw()
+	score = 0
+	#fp.draw()
 	progress_bar.setWidth(trials.thisN / trials.nTotal)
 	progress_bar_frame.draw()
 	progress_bar.draw()
@@ -392,7 +417,8 @@ for trial in trials:
 	#sampleData = []
 	while next_probe<2 or next_probe>14:
 		next_probe = np.random.gamma(8, 0.8, 1)[0]
-	
+
+
 	nPasses=0
 	helper.setText(u'Какая картинка меняется?')
 	helper.setAutoDraw(True)
@@ -402,7 +428,7 @@ for trial in trials:
 	if tracking_en:
 		iViewXAPI.iV_StopRecording()
 		iViewXAPI.iV_ClearRecordingBuffer()
-	buttons=myMouse.getPressed() 
+	buttons=myMouse.getPressed()
 	buttons=[]
 	print('Here1')
 	if tracking_en:
@@ -415,7 +441,7 @@ for trial in trials:
 		res = iViewXAPI.iV_GetSample(byref(sampleData))
 		eye_start_time=sampleData.timestamp
 	first_probe_on_target = 1
-	myMouse.clickReset() 
+	myMouse.clickReset()
 	current_item = 0
 
 	while continueRoutine:
@@ -434,22 +460,25 @@ for trial in trials:
 				ly.gazeY = pix2deg(-1 * (sampleData.leftEye.gazeY - win.size[1]/2), mon)
 				ry.gazeX = pix2deg(sampleData.rightEye.gazeX - win.size[0]/2, mon)
 				ry.gazeY = pix2deg(-1 * (sampleData.rightEye.gazeY - win.size[1]/2), mon)
-				eye_data.append([sampleData.timestamp,eye_start_time, sampleData.timestamp-eye_start_time, 
-				round(ly.gazeX, 4), round(ly.gazeY,4), ly.eyePositionZ, ly.diam, round(ry.gazeX,4), round(ry.gazeY,4), 
-				ry.eyePositionZ, ry.diam]) 
+				eye_data.append([sampleData.timestamp,eye_start_time, sampleData.timestamp-eye_start_time,
+				round(ly.gazeX, 4), round(ly.gazeY,4), ly.eyePositionZ, ly.diam, round(ry.gazeX,4), round(ry.gazeY,4),
+				ry.eyePositionZ, ry.diam])
 				eye_pos = [ly.gazeX, ly.gazeY] if ly.diam > 2 and ly.diam < 7 else [ry.gazeX, ry.gazeY] if ry.diam > 2 and ry.diam < 7 else []
 				if len(eye_pos)>1:
 					last_known_eye_pos=eye_pos
+
 			else:
 				eye_pos=[]
 		else:
 			eye_pos=[mx, my]
-		eye_positions.append(eye_pos)   
+		eye_positions.append(eye_pos)
 		totalFrameN+=1
-		
+
+
 		if totalFrameN>(prev_probe_frame+next_probe*frameRate) and abs(last_known_eye_pos[0]) < imSize*3 and abs(last_known_eye_pos[1]) < imSize*3:
 			thisExp.nextEntry()
-			
+
+
 			#print(last_known_eye_pos)
 			#print(len(eye_positions))
 			probes_loop.addData('probe_over_target',0)
@@ -461,37 +490,46 @@ for trial in trials:
 			probes_loop.addData('eyeStartX',last_known_eye_pos[0])
 			probes_loop.addData('eyeStartY',last_known_eye_pos[1])
 			prev_probe_frame = totalFrameN
-			
+
+
 			while True:
 				angle_deg = choice(angle_list)
 				angle=np.pi*angle_deg/180
 				eccentr=choice(ecc_list)
 				probe_xy = [last_known_eye_pos[0]+eccentr*cos(angle), last_known_eye_pos[1]+eccentr*sin(angle)]
 				if abs(probe_xy[0])<screen_dim_deg[0]/2 and abs(probe_xy[1])<screen_dim_deg[1]/2:
+
+
 					break
-			
+
 			probe.pos = probe_xy
 			probes_loop.addData('probe_x',probe_xy[0])
 			probes_loop.addData('probe_y',probe_xy[1])
 			probes_loop.addData('probe_angle',angle_deg)
 			probes_loop.addData('probe_ecc',eccentr)
-			
+
+
 			probe.autoDraw = True
 			next_probe = 0
 			while next_probe<2 or next_probe>14:
 				next_probe = np.random.gamma(8, 0.8, 1)[0]
 			probeClock.reset()
-		
-	
+
+
+
+
 #		 mousePosText.setText('%i, %i'%(mx,my))
 #		 mousePosText.color='black'
 		if len(eye_pos)>0:
 			on_target=np.linalg.norm(np.array(eye_pos)-np.array(target_pos))<imSize
-		
+
+
 		if len(eye_positions)>40:
-			
-			if on_target and first_probe_on_target or totalFrameN>(prev_probe_frame+next_probe*frameRate):
-			
+
+
+			if on_target and trial['show_probe_on_target'] and (first_probe_on_target or totalFrameN>(prev_probe_frame+next_probe*frameRate)):
+
+
 				trials.addData('pursuitEnd',frameN)
 				nPasses+=1
 				engaged=0
@@ -508,13 +546,16 @@ for trial in trials:
 				probes_loop.addData('eyeStartTimeStamp',lastEyeTimeStamp)
 				probes_loop.addData('eyeStartX',last_known_eye_pos[0])
 				probes_loop.addData('eyeStartY',last_known_eye_pos[1])
-				
+
+
 				prev_probe_frame = totalFrameN
 				if first_probe_on_target:
 					angle_deg = trial['trial_probe_angle']
 					eccentr=trial['trial_probe_ecc']
 					angle=np.pi*angle_deg/180
 					probe_xy = [last_known_eye_pos[0]+eccentr*cos(angle), last_known_eye_pos[1]+eccentr*sin(angle)]
+
+
 				else:
 					while True:
 						angle_deg = choice(angle_list)
@@ -522,6 +563,7 @@ for trial in trials:
 						eccentr=choice(ecc_list)
 						probe_xy = [last_known_eye_pos[0]+eccentr*cos(angle), last_known_eye_pos[1]+eccentr*sin(angle)]
 						if abs(probe_xy[0])<screen_dim_deg[0]/2 and abs(probe_xy[1])<screen_dim_deg[1]/2:
+
 							break
 
 
@@ -530,10 +572,12 @@ for trial in trials:
 				probes_loop.addData('probe_y',probe_xy[1])
 				probes_loop.addData('probe_angle',angle_deg)
 				probes_loop.addData('probe_ecc',eccentr)
+				if probe.status==1:
+					score-=20
 				probe.autoDraw = True
 				#probe.autoDraw = False
 				next_probe = 0
-				first_probe_on_target = 0 
+				first_probe_on_target = 0
 				while next_probe<2 or next_probe>14:
 					next_probe = np.random.gamma(8, 0.8, 1)[0]
 				probeClock.reset()
@@ -594,13 +638,18 @@ for trial in trials:
 		if len(event.getKeys('space')):
 			probes_loop.addData('probe_rt_trialstart',myClock.getTime())
 			probes_loop.addData('probe_rt_rel',probeClock.getTime())
+
+			probe_is_visible = 1 if probe.status == 1 else 0
+			if probe_is_visible:
+				score+=20
+
+			probes_loop.addData('probe_is_visible',probe_is_visible)
 			probes_loop.addData('probe_rt_frameN', totalFrameN)
 			probes_loop.addData('eyeEndTimeStamp',lastEyeTimeStamp)
 			probes_loop.addData('eyeEndX',last_known_eye_pos[0])
 			probes_loop.addData('eyeEndY',last_known_eye_pos[1])
 			probe.autoDraw = False
 
- 
 		buttons, times = myMouse.getPressed(True)
 		if buttons[0]:
 			mx, my = myMouse.getPos()
@@ -627,12 +676,19 @@ for trial in trials:
 					trials.addData('chosen_eye_TimeStamp',lastEyeTimeStamp)
 					correct = 1 if trials.thisTrial['change_pos']==i else 0
 					trials.addData('chosen_correct',correct)
+					if correct:
+						score+=100
+					else:
+						score-=100
+					score -= round(rt)*5
 					trials.addData('chosen_rt',times[0])
 					trials.addData('nPasses',nPasses)
 					continueRoutine=False
 					probe.autoDraw = False
+
+
 					win.flip()
-					
+
 					outputfile = os.getcwd()+'\\'+filename+'_trial_'+`trials.thisN`+'_eye'
 					if tracking_en:
 						res = iViewXAPI.iV_SaveData(str(outputfile),'','', 1)
@@ -653,10 +709,12 @@ for trial in trials:
 						writer.writerows(mouse_positions)
 					mouse_positions=[]
 
+
 					break
 			myMouse.clickReset()
 			buttons=[]
 			while myMouse.getPressed()[0]==1:
+
 				pass
 
 		if len(event.getKeys(['escape'])):
