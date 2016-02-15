@@ -271,13 +271,13 @@ angle_list=range(0,360,30)
 #for i in change_types:
 #	 print i
 #	 print sample(range(nImages),5)
-factorsList = data.createFactorialTrialList(factors={'change_type': change_types, 'trial_probe_ecc':ecc_list, 'trial_probe_angle':angle_list, 'show_probe_on_target':[0,1,1]})
+factorsList = data.createFactorialTrialList(factors={'change_type': change_types, 'trial_probe_ecc':ecc_list, 'trial_probe_angle': angle_list, 'show_probe_on_target': [0,1,1,1]})
 	#print 'factorsList: %g'%len(factorsList)
 	#mainTrials=mainTrials+factorsList
 
 #shuffle(mainTrials)
 
-trials = data.TrialHandler(nReps=3, method='random', extraInfo=expInfo, trialList=factorsList)
+trials = data.TrialHandler(nReps=1, method='random', extraInfo=expInfo, trialList=factorsList)
 thisExp.addLoop(trials)
 
 print 'Total trials: %g'%trials.nTotal
